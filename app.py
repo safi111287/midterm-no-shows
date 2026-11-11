@@ -3,13 +3,13 @@
 import gradio as gr
 
 from noshows.appointment import (
-    Appointment,
     CATEGORY_RULES,
     FEATURE_NAMES,
     NUMERIC_RULES,
+    Appointment,
 )
-
 from noshows.predictor import NoShowPredictor
+
 # ZeroGPU compatibility; local installations do not require spaces.
 try:
     import spaces
@@ -26,6 +26,8 @@ if spaces is not None:
 
 
 predictor = None
+
+
 def assess_booking(*values) -> tuple[str, str, str]:
     """Return action/error, no-show probability, and warning text.
 
@@ -35,26 +37,19 @@ def assess_booking(*values) -> tuple[str, str, str]:
     files or implement prediction/validation rules in this module.
     """
     try:
-        appointment = Appointment(
-            **dict(zip(FEATURE_NAMES, values, strict=True))
-        )
+        appointment = Appointment(**dict(zip(FEATURE_NAMES, values, strict=True)))
 
         result = predictor.predict(appointment)
 
-        action = (
-            "Call patient"
-            if result["call_patient"]
-            else "No call needed"
-        )
+        action = "Call patient" if result["call_patient"] else "No call needed"
 
-        probability = f'{result["no_show_probability"]:.2%}'
+        probability = f"{result['no_show_probability']:.2%}"
         warning = "\n".join(result["warnings"])
 
         return action, probability, warning
 
     except ValueError as exc:
         return f"Input error: {exc}", "", ""
-
 
 
 def build_demo() -> gr.Blocks:
@@ -67,7 +62,7 @@ def build_demo() -> gr.Blocks:
     """
     global predictor
     predictor = NoShowPredictor()
-    
+
     with gr.Blocks(title="Maple Physio No-Show Check") as demo:
         gr.Markdown("# Maple Physio No-Show Check")
         gr.Markdown("Enter appointment details to assess no-show risk.")
