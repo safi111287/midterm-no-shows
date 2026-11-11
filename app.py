@@ -2,6 +2,14 @@
 
 import gradio as gr
 
+from noshows.appointment import (
+    Appointment,
+    CATEGORY_RULES,
+    FEATURE_NAMES,
+    NUMERIC_RULES,
+)
+from noshows.predictor import NoShowPredictor
+
 # ZeroGPU compatibility; local installations do not require spaces.
 try:
     import spaces
@@ -27,6 +35,7 @@ def assess_booking(*values) -> tuple[str, str, str]:
     raise NotImplementedError("Implement the class-based form callback.")
 
 
+
 def build_demo() -> gr.Blocks:
     """Build inputs from the rules exposed by noshows.appointment.
 
@@ -35,6 +44,48 @@ def build_demo() -> gr.Blocks:
     fractional input so Appointment can reject non-whole numbers.
     Show a plain call/no-call action, a percentage, and missing-distance warning.
     """
+    with gr.Blocks(title="Maple Physio No-Show Check") as demo:
+        gr.Markdown("# Maple Physio No-Show Check")
+        gr.Markdown(
+            "Enter appointment details to estimate no-show risk "
+            "and determine whether a confirmation call is recommended."
+        )
+
+        # TODO: Add exactly ten input components.
+        # Follow FEATURE_NAMES order from noshows.appointment.
+        # Read numeric limits and categories from that module.
+        # Use precision=None for numeric fields.
+        # Leave distance_km blank by default.
+
+        submit_button = gr.Button("Assess Booking")
+
+        action_output = gr.Textbox(
+            label="Action / Input Error",
+            interactive=False,
+        )
+
+        probability_output = gr.Textbox(
+            label="No-Show Probability",
+            interactive=False,
+        )
+
+        warning_output = gr.Textbox(
+            label="Warning",
+            interactive=False,
+        )
+
+        # TODO: Connect submit_button.click(
+        #     fn=assess_booking,
+        #     inputs=[...],
+        #     outputs=[
+        #         action_output,
+        #         probability_output,
+        #         warning_output,
+        #     ],
+        # )
+
+    return demo
+
     raise NotImplementedError("Implement the Gradio Blocks page.")
 
 
