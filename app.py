@@ -3,12 +3,11 @@
 import gradio as gr
 
 from noshows.appointment import (
-    Appointment,
     CATEGORY_RULES,
     FEATURE_NAMES,
     NUMERIC_RULES,
 )
-from noshows.predictor import NoShowPredictor
+# from noshows.predictor import NoShowPredictor
 
 # ZeroGPU compatibility; local installations do not require spaces.
 try:
@@ -16,6 +15,7 @@ try:
 except ImportError:
     spaces = None
 
+# ZeroGPU compatibility
 if spaces is not None:
 
     @spaces.GPU
@@ -24,28 +24,15 @@ if spaces is not None:
         return None
 
 
+def assess_booking(*values) -> tuple[str, str, str]:
+    """Return action/error, no-show probability, and warning text.
 
-    try:
-        appointment = Appointment(
-            **dict(zip(FEATURE_NAMES, values, strict=True))
-        )
-        result = predictor.predict(appointment)
-
-        action = (
-            "Call patient"
-            if result["call_patient"]
-            else "No call needed"
-        )
-        probability = f'{result["no_show_probability"]:.2%}'
-        warning = "\n".join(result["warnings"])
-
-        return action, probability, warning
-
-    except ValueError as exc:
-        return f"Input error: {exc}", "", ""
-
+    Map values in Appointment's FEATURE_NAMES order, construct Appointment,
+    and call one reusable NoShowPredictor instance. Catch ValueError and
+    clear probability/warning outputs on invalid input. Do not read model
+    files or implement prediction/validation rules in this module.
+    """
     raise NotImplementedError("Implement the class-based form callback.")
-
 
 
 
@@ -127,11 +114,3 @@ def build_demo() -> gr.Blocks:
         )
 
     return demo
-
-
-    raise NotImplementedError("Implement the Gradio Blocks page.")
-
-
-if __name__ == "__main__":
-    demo = build_demo()
-    demo.launch()
