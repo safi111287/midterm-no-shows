@@ -1,0 +1,13 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 88
+src = [".", "tests"]
+target-version = "py312"
+# The instructor's data generator is preserved verbatim.
+extend-exclude = ["noshows/data.py"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
