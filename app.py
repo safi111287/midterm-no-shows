@@ -3,12 +3,13 @@
 import gradio as gr
 
 from noshows.appointment import (
+    Appointment,
     CATEGORY_RULES,
     FEATURE_NAMES,
     NUMERIC_RULES,
 )
-# from noshows.predictor import NoShowPredictor
 
+from noshows.predictor import NoShowPredictor
 # ZeroGPU compatibility; local installations do not require spaces.
 try:
     import spaces
@@ -35,7 +36,6 @@ def assess_booking(*values) -> tuple[str, str, str]:
     raise NotImplementedError("Implement the class-based form callback.")
 
 
-
 def build_demo() -> gr.Blocks:
     """Build inputs from the rules exposed by noshows.appointment.
 
@@ -54,10 +54,7 @@ def build_demo() -> gr.Blocks:
             if name in NUMERIC_RULES:
                 minimum, maximum, whole_number = NUMERIC_RULES[name]
 
-                label = (
-                    f"{name.replace('_', ' ').title()} "
-                    f"({minimum}–{maximum})"
-                )
+                label = f"{name.replace('_', ' ').title()} ({minimum}–{maximum})"
 
                 if whole_number:
                     label += " — whole number required"
@@ -114,3 +111,8 @@ def build_demo() -> gr.Blocks:
         )
 
     return demo
+
+
+if __name__ == "__main__":
+    demo = build_demo()
+    demo.launch()
