@@ -7,7 +7,7 @@ from typing import TypedDict
 
 import joblib
 
-from noshows.appointment import Appointment, FEATURE_NAMES
+from noshows.appointment import FEATURE_NAMES, Appointment
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 MODEL_PATH = PROJECT_ROOT / "models" / "no_show.joblib"
