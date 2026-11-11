@@ -1,0 +1,84 @@
+{
+  "seed": 11,
+  "n_training": 3000,
+  "n_test": 1000,
+  "training_no_show_rate": 0.26166666666666666,
+  "selection_metric": "highest training CV mean ROC-AUC among non-dummy candidates",
+  "selected_model": "logistic",
+  "threshold": 0.25,
+  "threshold_source": "minimum training out-of-fold cost on 0.05-0.95 grid, step 0.01",
+  "oof_threshold_cost": 18802.0,
+  "cost_rule": {
+    "call_cost": 8.0,
+    "miss_cost": 35.0
+  },
+  "category_spelling_check": {
+    "field": "weekday",
+    "accepted_spelling": "mon",
+    "accepted_probability": 0.1457082382033465,
+    "unseen_spelling": "Mon",
+    "unseen_encoder_probability": 0.11962488414015937,
+    "note": "Raw-pipeline diagnostic only; Appointment must reject Mon."
+  },
+  "tuning": {
+    "scoring": "roc_auc",
+    "combinations": 6,
+    "best_search_params": {
+      "C": 1.0,
+      "fit_intercept": false
+    },
+    "untuned_mean": 0.7272993918132018,
+    "untuned_std": 0.013081192723572914,
+    "tuned_mean": 0.7273367744532788,
+    "tuned_std": 0.011775954703754263,
+    "improvement": 3.7382640077021634e-05,
+    "improvement_exceeds_untuned_std": false,
+    "used_tuned": true
+  },
+  "leakage": {
+    "honest_roc_auc_mean": 0.7273367744532788,
+    "honest_roc_auc_std": 0.013165917608776466,
+    "leaked_roc_auc_mean": 0.9229227473364869,
+    "leaked_roc_auc_std": 0.008482955684953998
+  },
+  "test_results": {
+    "n_test": 1000,
+    "no_shows": 262,
+    "no_show_rate": 0.262,
+    "calls": 432,
+    "accuracy": 0.664,
+    "precision": 0.41435185185185186,
+    "recall": 0.683206106870229,
+    "f1": 0.515850144092219,
+    "roc_auc": 0.7290490080473324,
+    "confusion_matrix": [
+      [
+        485,
+        253
+      ],
+      [
+        83,
+        179
+      ]
+    ],
+    "costs": {
+      "call_nobody": 9170.0,
+      "call_everybody": 8000.0,
+      "model": 6361.0
+    },
+    "savings_vs_nobody": 2809.0,
+    "savings_vs_everybody": 1639.0,
+    "beats_both": true
+  },
+  "test_savings_95_percent_bootstrap_intervals": {
+    "vs_nobody": [
+      2113.925,
+      3547.124999999999
+    ],
+    "vs_everybody": [
+      1016.925,
+      2239.0
+    ]
+  },
+  "cv_selection_caveat": "Model family and settings were selected using the training folds. The same folds were reused for OOF threshold choice, so training selection scores are not a nested-CV estimate. The held-out test was not used to choose."
+}

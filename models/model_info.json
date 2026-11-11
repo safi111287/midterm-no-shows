@@ -1,0 +1,86 @@
+{
+  "sklearn_version": "1.8.0",
+  "python_version": "3.12",
+  "seed": 11,
+  "threshold": 0.25,
+  "selected_model": "logistic",
+  "numeric_features": [
+    "lead_days",
+    "age",
+    "prior_no_shows",
+    "hour",
+    "first_visit",
+    "distance_km"
+  ],
+  "categorical_features": [
+    "weekday",
+    "booking",
+    "insurance",
+    "treatment"
+  ],
+  "feature_names": [
+    "lead_days",
+    "age",
+    "prior_no_shows",
+    "hour",
+    "first_visit",
+    "distance_km",
+    "weekday",
+    "booking",
+    "insurance",
+    "treatment"
+  ],
+  "class_labels": {
+    "attend": 0,
+    "no_show": 1
+  },
+  "best_settings": {
+    "C": 1.0,
+    "class_weight": null,
+    "dual": false,
+    "fit_intercept": false,
+    "intercept_scaling": 1,
+    "l1_ratio": 0.0,
+    "max_iter": 2000,
+    "n_jobs": null,
+    "penalty": "deprecated",
+    "random_state": 11,
+    "solver": "lbfgs",
+    "tol": 0.0001,
+    "verbose": 0,
+    "warm_start": false
+  },
+  "test_results": {
+    "n_test": 1000,
+    "no_shows": 262,
+    "no_show_rate": 0.262,
+    "calls": 432,
+    "accuracy": 0.664,
+    "precision": 0.41435185185185186,
+    "recall": 0.683206106870229,
+    "f1": 0.515850144092219,
+    "roc_auc": 0.7290490080473324,
+    "confusion_matrix": [
+      [
+        485,
+        253
+      ],
+      [
+        83,
+        179
+      ]
+    ],
+    "costs": {
+      "call_nobody": 9170.0,
+      "call_everybody": 8000.0,
+      "model": 6361.0
+    },
+    "savings_vs_nobody": 2809.0,
+    "savings_vs_everybody": 1639.0,
+    "beats_both": true
+  },
+  "cost_rule": {
+    "call_cost": 8.0,
+    "miss_cost": 35.0
+  }
+}
