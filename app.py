@@ -48,6 +48,7 @@ if spaces is not None:
 
 
 
+
 def build_demo() -> gr.Blocks:
     """Build inputs from the rules exposed by noshows.appointment.
 
@@ -58,18 +59,47 @@ def build_demo() -> gr.Blocks:
     """
     with gr.Blocks(title="Maple Physio No-Show Check") as demo:
         gr.Markdown("# Maple Physio No-Show Check")
-        gr.Markdown(
-            "Enter appointment details to estimate no-show risk "
-            "and determine whether a confirmation call is recommended."
+        gr.Markdown("Enter appointment details to assess no-show risk.")
+
+        inputs = []
+
+        for name in FEATURE_NAMES:
+            if name in NUMERIC_RULES:
+                minimum, maximum, whole_number = NUMERIC_RULES[name]
+
+                label = (
+                    f"{name.replace('_', ' ').title()} "
+                    f"({minimum}–{maximum})"
+                )
+
+                if whole_number:
+                    label += " — whole number required"
+
+                if name == "distance_km":
+                    label += " — optional"
+
+                component = gr.Number(
+                    label=label,
+                    value=None,
+                    precision=None,
+                )
+
+            elif name in CATEGORY_RULES:
+                component = gr.Dropdown(
+                    choices=list(CATEGORY_RULES[name]),
+                    label=name.replace("_", " ").title(),
+                    value=None,
+                )
+
+            else:
+                raise ValueError(f"Unknown feature: {name}")
+
+            inputs.append(component)
+
+        submit_button = gr.Button(
+            "Assess Booking",
+            variant="primary",
         )
-
-        # TODO: Add exactly ten input components.
-        # Follow FEATURE_NAMES order from noshows.appointment.
-        # Read numeric limits and categories from that module.
-        # Use precision=None for numeric fields.
-        # Leave distance_km blank by default.
-
-        submit_button = gr.Button("Assess Booking")
 
         action_output = gr.Textbox(
             label="Action / Input Error",
@@ -82,21 +112,22 @@ def build_demo() -> gr.Blocks:
         )
 
         warning_output = gr.Textbox(
-            label="Warning",
+            label="Warning Text",
             interactive=False,
         )
 
-        # TODO: Connect submit_button.click(
-        #     fn=assess_booking,
-        #     inputs=[...],
-        #     outputs=[
-        #         action_output,
-        #         probability_output,
-        #         warning_output,
-        #     ],
-        # )
+        submit_button.click(
+            fn=assess_booking,
+            inputs=inputs,
+            outputs=[
+                action_output,
+                probability_output,
+                warning_output,
+            ],
+        )
 
     return demo
+
 
     raise NotImplementedError("Implement the Gradio Blocks page.")
 
