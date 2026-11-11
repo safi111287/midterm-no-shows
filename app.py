@@ -24,14 +24,26 @@ if spaces is not None:
         return None
 
 
-def assess_booking(*values) -> tuple[str, str, str]:
-    """Return action/error, no-show probability, and warning text.
 
-    Map values in Appointment's FEATURE_NAMES order, construct Appointment,
-    and call one reusable NoShowPredictor instance. Catch ValueError and
-    clear probability/warning outputs on invalid input. Do not read model
-    files or implement prediction/validation rules in this module.
-    """
+    try:
+        appointment = Appointment(
+            **dict(zip(FEATURE_NAMES, values, strict=True))
+        )
+        result = predictor.predict(appointment)
+
+        action = (
+            "Call patient"
+            if result["call_patient"]
+            else "No call needed"
+        )
+        probability = f'{result["no_show_probability"]:.2%}'
+        warning = "\n".join(result["warnings"])
+
+        return action, probability, warning
+
+    except ValueError as exc:
+        return f"Input error: {exc}", "", ""
+
     raise NotImplementedError("Implement the class-based form callback.")
 
 
