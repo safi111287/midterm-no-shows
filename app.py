@@ -25,6 +25,7 @@ if spaces is not None:
         return None
 
 
+predictor = None
 def assess_booking(*values) -> tuple[str, str, str]:
     """Return action/error, no-show probability, and warning text.
 
@@ -33,7 +34,27 @@ def assess_booking(*values) -> tuple[str, str, str]:
     clear probability/warning outputs on invalid input. Do not read model
     files or implement prediction/validation rules in this module.
     """
-    raise NotImplementedError("Implement the class-based form callback.")
+    try:
+        appointment = Appointment(
+            **dict(zip(FEATURE_NAMES, values, strict=True))
+        )
+
+        result = predictor.predict(appointment)
+
+        action = (
+            "Call patient"
+            if result["call_patient"]
+            else "No call needed"
+        )
+
+        probability = f'{result["no_show_probability"]:.2%}'
+        warning = "\n".join(result["warnings"])
+
+        return action, probability, warning
+
+    except ValueError as exc:
+        return f"Input error: {exc}", "", ""
+
 
 
 def build_demo() -> gr.Blocks:
@@ -44,6 +65,9 @@ def build_demo() -> gr.Blocks:
     fractional input so Appointment can reject non-whole numbers.
     Show a plain call/no-call action, a percentage, and missing-distance warning.
     """
+    global predictor
+    predictor = NoShowPredictor()
+    
     with gr.Blocks(title="Maple Physio No-Show Check") as demo:
         gr.Markdown("# Maple Physio No-Show Check")
         gr.Markdown("Enter appointment details to assess no-show risk.")
