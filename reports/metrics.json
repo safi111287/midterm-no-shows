@@ -17,7 +17,7 @@
     "accepted_spelling": "mon",
     "accepted_probability": 0.1457082382033465,
     "unseen_spelling": "Mon",
-    "unseen_encoder_probability": 0.11962488414015937,
+    "unseen_encoder_probability": 0.11962488414015934,
     "note": "Raw-pipeline diagnostic only; Appointment must reject Mon."
   },
   "tuning": {
