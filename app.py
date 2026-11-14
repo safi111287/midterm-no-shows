@@ -1,4 +1,4 @@
-"""Maple Physio Gradio page; implementation owned by Art."""
+"""Gradio interface for appointment no-show predictions."""
 
 import gradio as gr
 
@@ -16,12 +16,11 @@ try:
 except ImportError:
     spaces = None
 
-# ZeroGPU compatibility
 if spaces is not None:
 
     @spaces.GPU
     def gpu_placeholder():
-        """Provide the GPU entry point required by ZeroGPU hosting."""
+        """Provide the GPU entry point for ZeroGPU hosting."""
         return None
 
 
@@ -29,20 +28,12 @@ predictor = None
 
 
 def assess_booking(*values) -> tuple[str, str, str]:
-    """Return action/error, no-show probability, and warning text.
-
-    Map values in Appointment's FEATURE_NAMES order, construct Appointment,
-    and call one reusable NoShowPredictor instance. Catch ValueError and
-    clear probability/warning outputs on invalid input. Do not read model
-    files or implement prediction/validation rules in this module.
-    """
+    """Return the call decision, no-show probability, and input warning."""
     try:
         appointment = Appointment(**dict(zip(FEATURE_NAMES, values, strict=True)))
-
         result = predictor.predict(appointment)
 
         action = "Call patient" if result["call_patient"] else "No call needed"
-
         probability = f"{result['no_show_probability']:.2%}"
         warning = "\n".join(result["warnings"])
 
@@ -53,13 +44,7 @@ def assess_booking(*values) -> tuple[str, str, str]:
 
 
 def build_demo() -> gr.Blocks:
-    """Build inputs from the rules exposed by noshows.appointment.
-
-    Use one predictor instance for all submissions, not one per click.
-    Display numeric limits, keep distance blank by default, and preserve
-    fractional input so Appointment can reject non-whole numbers.
-    Show a plain call/no-call action, a percentage, and missing-distance warning.
-    """
+    """Build the booking form and reuse one predictor for submissions."""
     global predictor
     predictor = NoShowPredictor()
 
@@ -72,7 +57,6 @@ def build_demo() -> gr.Blocks:
         for name in FEATURE_NAMES:
             if name in NUMERIC_RULES:
                 minimum, maximum, whole_number = NUMERIC_RULES[name]
-
                 label = f"{name.replace('_', ' ').title()} ({minimum}–{maximum})"
 
                 if whole_number:
@@ -108,12 +92,10 @@ def build_demo() -> gr.Blocks:
             label="Action / Input Error",
             interactive=False,
         )
-
         probability_output = gr.Textbox(
             label="No-Show Probability",
             interactive=False,
         )
-
         warning_output = gr.Textbox(
             label="Warning Text",
             interactive=False,
