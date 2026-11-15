@@ -1,6 +1,7 @@
 """Gradio interface for appointment no-show predictions."""
 
 import gradio as gr
+import sys
 
 from noshows.appointment import (
     CATEGORY_RULES,
@@ -25,6 +26,20 @@ if spaces is not None:
 
 
 predictor = None
+
+# Hide only the known asyncio cleanup message; Keep all other errors visible.
+def filter_cleanup_error(error):
+    """Suppress only the known asyncio cleanup message."""
+    if (
+        isinstance(error.exc_value, ValueError)
+        and str(error.exc_value) == "Invalid file descriptor: -1"
+        and getattr(error.object, "__module__", "") == "asyncio.base_events"
+        and getattr(error.object, "__qualname__", "") == "BaseEventLoop.__del__"
+    ):
+        return
+    sys.__unraisablehook__(error)
+        
+sys.unraisablehook = filter_cleanup_error
 
 
 def assess_booking(*values) -> tuple[str, str, str]:
