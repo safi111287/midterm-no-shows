@@ -21,62 +21,135 @@ simplifying assumption, a called patient attends, so a called booking costs only
 The intended page estimates no-show probability and recommends whether to call.
 It supports reception staff judgment and does not diagnose patients.
 
-**Development status:** The training foundation, saved model, reports, and core
-tests are complete. Appointment, NoShowPredictor, the Gradio page, and their
-assigned tests are implementation skeletons. This repository is not yet a
-completed or deployed submission. No public Space or demo link exists yet.
+**Public Space:** [Maple Physio No-Show Check](https://huggingface.co/spaces/SafaaAlhawasli/maple-physio-no-show)
+
+**Source repository:** [midterm-no-shows](https://github.com/safi111287/midterm-no-shows)
+
+The application, validation classes, training workflow, saved pipeline, reports,
+and automated tests are implemented. The Space URL identifies the deployment;
+local test results alone do not establish that the public deployment is running.
 
 ## How to run it locally
 
-Python 3.12 is used both locally and in the Space settings. Create the environment
-from the repository root:
+### Clone into a separate folder
+
+Install Git and Miniconda or Anaconda. From a parent folder, clone the repository
+into a new folder named `midterm-no-shows-test`:
+
+```bash
+git clone https://github.com/safi111287/midterm-no-shows.git midterm-no-shows-test
+cd midterm-no-shows-test
+```
+### Create the environment
 
 ```bash
 conda env create -f environment.yml
 conda activate midterm-no-shows
-python -m noshows.train
+conda run -n midterm-no-shows python --version
 ```
 
-Train from this environment, not from an older lab environment. If the environment
-already exists, activate it; do not recreate it. After dependency changes, run:
+The project uses Python **3.12** in Conda, model metadata, and the Space settings.
+The environment file uses `conda-forge` and installs `requirements-dev.txt`, which
+includes the runtime requirements. No editable installation is required.
+
+If this environment already exists, activate it instead of creating it again.
+After dependency changes, update it with:
 
 ```bash
 conda env update -f environment.yml --prune
 ```
 
-The training command recreates the complete pipeline, model metadata, CV table,
-grid-search results, threshold costs, and held-out test report. It does not need
-the unfinished app or prediction classes.
+### Launch the saved model
 
-After the assigned classes and page have been implemented:
-
-```bash
-gradio app.py
-```
-
-If PowerShell cannot activate conda or cannot find `gradio`, use:
+The committed model is ready for inference; retraining is not required to open
+the page.
 
 ```bash
-conda run --no-capture-output -n midterm-no-shows gradio app.py
+conda run --no-capture-output -n midterm-no-shows python app.py
 ```
 
-The environment file installs `requirements-dev.txt`, which includes the runtime
-requirements. No editable package installation is necessary with this flat layout.
+Open the local URL printed in the terminal, usually `http://127.0.0.1:7860`.
+Press Ctrl+C in the terminal to stop the server.
+
+### Reproduce training and reports
+
+```bash
+python -m noshows.train
+```
+
+PowerShell alternative:
+
+```powershell
+conda run --no-capture-output -n midterm-no-shows python -m noshows.train
+```
+
+Training regenerates all six outputs:
+
+| Output | Contents |
+|---|---|
+| `models/no_show.joblib` | Entire fitted preprocessing and classifier pipeline |
+| `models/model_info.json` | Versions, seed, threshold, feature order, settings, and test results |
+| `reports/cv_results.csv` | Five-fold model comparison |
+| `reports/grid_search.csv` | Hyperparameter search results |
+| `reports/threshold_costs.csv` | Training OOF costs for the 91 thresholds |
+| `reports/metrics.json` | Selection, tuning, category comparison, leakage, test metrics, and savings intervals |
+
+Retraining overwrites these artifacts. Reported results below describe the
+committed artifacts; keep model files, metadata, and documentation together if
+training is rerun. Minor numerical differences can occur across platforms or
+transitive dependency versions.
+
+### Use the form
+
+Enter all booking fields; only distance may be left blank. Click **Assess Booking**.
+The three outputs are the call decision or input error, no-show probability as a
+percentage, and warning text. Invalid submissions clear the probability and
+warning outputs so that a previous result is not presented as current.
+
+For a valid example, enter lead days 2, age 65, prior no-shows 0, hour 11,
+first visit 0, distance 2, weekday `wed`, booking `front_desk`, insurance
+`provincial`, and treatment `acupuncture`. Local checks of the saved model showed
+**No call needed**, approximately **2.01%**, and no warning. Clearing distance
+keeps prediction available and displays the training-median warning. Entering
+age 40.5 produces a field-specific whole-number error and clears the other outputs.
+
+### Deploy the same code
+
+Use the public Gradio Space linked above. Upload the project files at the Space
+repository root, retaining `app.py`, `noshows/`, `models/`, `requirements.txt`, and
+this README with its settings block. Preserve the other project files when
+publishing a complete repository copy.
+
+The settings specify Gradio **6.31.0**, Python **3.12**, and `app_file: app.py`.
+Gradio is supplied through `sdk_version`, so it is deliberately absent from
+runtime `requirements.txt`; it is pinned in `requirements-dev.txt` for local use.
+The runtime pins are scikit-learn **1.8.0**, pandas **2.2.3**, and joblib **1.5.3**.
+
+The model runs on CPU and performs no GPU computation. The optional
+`spaces.GPU` placeholder supports the assignment's ZeroGPU hosting setup and does
+not participate in predictions. Its import is guarded for local installations;
+`spaces` is not added to runtime requirements.
+
+GitHub and Hugging Face have separate repositories. A GitHub push does not
+update the Space without an explicit upload, push, or configured synchronization.
+The Space deployment must match the final reviewed GitHub code. Validate its
+public URL in a signed-out/private window using a valid booking, invalid input,
+and missing distance.
 
 ## Team
 
-The following are assigned responsibilities; unfinished tasks are not claimed as completed work.
+| Member | Parts owned and integration contributions |
+|---|---|
+| Safaa Alhawasli | Shared contracts, environment, data integration, preprocessing, evaluation, training, model and reports, pipeline/evaluation tests, integration, expanded interface tests, and documentation/deployment coordination |
+| Md Kawsarul Islam | Appointment and NoShowPredictor classes and their validation/prediction tests |
+| Art | Gradio Blocks page, form components, and booking callback |
+| Rafael | Deployment tests and checks of environment, dependencies, metadata, and report files |
 
-| Member | Responsibilities | Current state |
-|---|---|---|
-| Safaa Alhawasli | Environment, shared interfaces, data integration, preprocessing, evaluation, training, generated model/reports, core tests, integration and deployment coordination | Training foundation implemented; final integration pending |
-| Md Kawsarul Islam | Appointment, NoShowPredictor, their tests, and class-design/validation report text | Implementation pending |
-| Art (full name pending) | Gradio page, callback tests, live valid/invalid/missing-input checks, and interface report text | Implementation pending |
-| Rafael (full name pending) | Deployment tests, setup verification, fresh-clone checks, and local-run documentation review | Implementation pending |
-
-Every member must commit from their own GitHub account, make at least three
-meaningful commits, review another member's work, and speak in the demo.
-The group must have at least fifteen meaningful commits. See `docs/TEAM_HANDOFF.md`.
+Members work on individual branches and combine reviewed components through
+`integration`. Before merging into `main`, at least two members review the change.
+The commit history records individual contributions; each member contributes at
+least three meaningful commits, with at least fifteen across the group. Every
+member participates in the approximately four-minute demo.
 
 ## Decisions
 
@@ -104,12 +177,12 @@ Appointment module for the page.
 The whole-number requirement applies to counts, whole-day/hour inputs, and the
 binary flag. Only distance permits a gap. The Appointment contract accepts None,
 blank text, or NaN for distance and converts it to NaN; infinity is invalid.
-It must emit a missing-distance warning. The pipeline substitutes the median learned
+It emits a missing-distance warning. The pipeline substitutes the median learned
 from the training partition/fold. No median or scaler is fitted on the test set.
 
 `OneHotEncoder(handle_unknown="ignore")` is a technical safeguard, not permission
 to accept misspellings. An unseen value is encoded as zeros for that feature, which
-can change the probability without raising an error. Appointment must therefore
+can change the probability without raising an error. Appointment therefore
 reject unrecognized category values and name the offending field.
 
 For a fixed example with lead_days=7, age=46, prior_no_shows=0, hour=11,
@@ -118,10 +191,12 @@ first_visit=0, distance_km=5, booking=phone, insurance=private, treatment=physio
 | weekday spelling | Raw saved-pipeline no-show probability | Intended input handling |
 |---|---:|---|
 | mon | 14.5708% | Accepted |
-| Mon | 11.9625% | Must be rejected by Appointment |
+| Mon | 11.9625% | Rejected by Appointment |
 
-This is a raw-pipeline diagnostic generated by training, not a claim that the
-unfinished app already validates these inputs. It does not change the model.
+This diagnostic deliberately bypasses Appointment to demonstrate the encoder
+behavior. The public input boundary rejects `Mon`; it does not return that raw
+probability to a user. The spelling alone changes the diagnostic probability by
+about 2.61 percentage points, demonstrating why validation is necessary.
 
 The cost function is:
 
@@ -135,8 +210,8 @@ A worked test example has outcomes `[1, 0, 1, 1, 0]` and call decisions
 Thresholds from 0.05 to 0.95 in steps of 0.01 are evaluated on training out-of-fold
 probabilities. The selected threshold is **0.25**. Equal probability
 means call: `probability >= saved threshold`. Equal-cost thresholds prefer fewer
-calls, then the larger threshold. Runtime prediction must read the threshold from
-`models/model_info.json`; it must not contain a typed-in decision threshold.
+calls, then the larger threshold. Runtime prediction reads the threshold from
+`models/model_info.json`; no decision threshold is hard-coded in the predictor.
 The expected-cost break-even point $8/$35 is about 0.229 for perfectly calibrated
 probabilities, but the implemented threshold is selected empirically as required.
 
@@ -196,8 +271,8 @@ model and fixed threshold recommend 432 calls.
 | ROC-AUC | 0.7290 |
 | Accuracy at the cost threshold | 0.6640 |
 
-Confusion matrix, with actual classes in rows and decisions in columns,
-ordered [attend/no-call, no-show/call]: `[[485, 253], [83, 179]]`.
+Confusion matrix: `[[485, 253], [83, 179]]`. Rows are actual outcomes
+`[attend, no_show]`; columns are decisions `[no_call, call]`.
 Here call decisions are evaluated against the original no-show outcomes, before
 any hypothetical intervention. The cost calculation assumes calls prevent misses.
 
@@ -234,35 +309,49 @@ saved as the production model.
 
 ## Tests
 
-The implemented foundation tests cover reproducible data, excluded fields,
-stratified split size and separation, fold reproducibility, training-only
-imputation, missing distance, pipeline independence, hand-calculated costs,
-call-all/call-none cases, threshold extremes, and invalid probabilities.
+The integrated suite passed **122 test cases** locally on Python 3.12.16.
+Parametrization expands test functions into multiple cases; the case count is not
+a code-coverage percentage or a claim that every possible behavior is tested.
 
-During foundation development, run:
+| Module | Cases | Main checks |
+|---|---:|---|
+| `tests/test_pipeline.py` | 8 | Reproducible data, feature exclusions, split size/disjointness/stratification, missing distance, training-only median, independent models, five-fold CV |
+| `tests/test_evaluation.py` | 16 | Hand-worked cost, call-all/call-none policies, threshold extremes and grid, invalid probabilities, length mismatch, summary costs |
+| `tests/test_appointment.py` | 45 | Feature order, valid rows, numeric normalization, missing distance, invalid fields/categories, immutability, required arguments |
+| `tests/test_predictor.py` | 25 | Probability schema/range, risk ordering, threshold boundaries, metadata checks, class order, single model load, warning propagation |
+| `tests/test_app.py` | 20 | Valid/invalid submissions, clearing previous outputs, missing-distance warnings, predictor reuse, component order/rules, callback wiring |
+| `tests/test_deployment.py` | 8 | Artifacts, sklearn agreement, dependency pins, Gradio SDK, Python agreement, app path, development tools, reports |
 
-```bash
-python -m pytest tests/test_pipeline.py tests/test_evaluation.py
-```
+`tests/conftest.py` supplies a shared valid booking fixture. Deployment tests check
+local configuration and artifacts; a live public-Space check remains a separate
+part of deployment verification.
 
-The other test modules are assigned skeletons that deliberately raise
-NotImplementedError until completed. They are not skipped or represented as passing.
-The final suite must include validation, immutability, missing-distance warning,
-probability/risk ordering, saved-threshold boundaries, one model load per predictor,
-interface errors, and deployment agreements including Python 3.12.
-
-After every implementation is complete, all three final commands must pass from
-a fresh clone with the environment active:
+Run all three checks from a fresh clone:
 
 ```bash
 python -m ruff format --check .
 python -m ruff check .
-python -m pytest
+python -m pytest -q
 ```
 
-The instructor's `noshows/data.py` is preserved verbatim and excluded from automatic
-Ruff rewriting. All authored project modules are checked and formatted.
-No models or generated reports are ignored by git.
+Without activating Conda in PowerShell:
+
+```powershell
+conda run -n midterm-no-shows python -m ruff format --check .
+conda run -n midterm-no-shows python -m ruff check .
+conda run -n midterm-no-shows python -m pytest -q
+```
+
+Ruff formatting and lint checks passed for the integrated version. Local test
+runs also reported 312 repeated `DeprecationWarning` messages from
+`joblib/numpy_pickle.py` while loading NumPy arrays. These are library warnings,
+not failed tests; they are not suppressed by the project. The direct runtime
+libraries are pinned, but transitive dependencies are not fully locked, so
+cross-platform reproducibility is not bit-for-bit guaranteed.
+
+The instructor's `noshows/data.py` is preserved unchanged and excluded from Ruff
+rewriting. Model and report artifacts are tracked by Git. After final edits,
+repeat fresh-clone environment creation, training reproduction, and these checks.
 
 ## Limitations
 
